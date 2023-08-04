@@ -1,0 +1,38 @@
+import pandas as pd
+import numpy as np
+import plotly.express as px
+from sklearn.neighbors import NearestNeighbors
+data = pd.read_csv("/content/diabetes.csv")
+df = data[['Age','BMI']]
+fig = px.scatter(df, x='Age',y='BMI')
+fig.show()
+print(df)
+
+
+
+X = df.values
+knn = NearestNeighbors(n_neighbors=3)
+knn.fit(X)
+distances, indexes = knn.kneighbors(X)
+fig = px.line(distances.mean(axis =1),title="Average
+Distance Plot")
+fig.update_xaxes(title_text='Data Index')
+fig.update_yaxes(title_text='Average Distance')
+fig.show()
+
+
+
+import plotly.graph_objects as go
+outlier_index = np.where(distances.mean(axis = 1) > 6)
+outlier_values = df.iloc[outlier_index]
+fig_normal = px.scatter(df, x='Age',y='BMI')
+fig_outlier = px.scatter(outlier_values,x='Age',y='BMI')
+fig_outlier=fig_outlier.update_traces(marker=dict(size=12,l
+ine=dict(width=2,color='Red')),selector=dict(mode='markers'
+))
+fig_outlier.update_traces(marker=dict(size=12,line=dict(wid
+th=2,color='Red')),selector=dict(mode='markers'))
+fig = go.Figure(data=fig_outlier.data + fig_normal.data)
+fig.update_xaxes(title_text='Age')
+fig.update_yaxes(title_text='BMI')
+fig.show()
